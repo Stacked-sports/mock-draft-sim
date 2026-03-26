@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Draft Night</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+
+<div class="max-w-5xl mx-auto p-6">
+
+  <h1 class="text-4xl font-bold mb-2 text-center">Draft Night</h1>
+  <p class="text-center text-gray-400 mb-6">Build your team. Break the league.</p>
+
+  <div class="flex gap-4 justify-center mb-6">
+    <button id="startBtn" class="bg-green-600 px-4 py-2 rounded">Start Draft</button>
+    <button id="simBtn" class="bg-yellow-500 px-4 py-2 rounded">Sim To My Pick</button>
+  </div>
+
+  <div class="text-center mb-6">
+    <h2 id="status" class="text-xl font-semibold">Waiting to start...</h2>
+  </div>
+
+  <div class="grid grid-cols-2 gap-6">
+
+    <!-- Draft Board -->
+    <div>
+      <h3 class="text-lg font-bold mb-2">Draft Board</h3>
+      <div id="board" class="bg-gray-800 p-4 rounded h-[400px] overflow-y-auto"></div>
+    </div>
+
+    <!-- Players -->
+    <div>
+      <h3 class="text-lg font-bold mb-2">Available Players</h3>
+      <div id="players" class="bg-gray-800 p-4 rounded h-[400px] overflow-y-auto"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const userTeam = "Chicago Bears";
+
+const teams = [
+  "Panthers","Commanders","Patriots","Cardinals","Chargers",
+  "Giants","Titans","Falcons","Bears","Jets"
+];
+
+let players = [
+  {name:"Caleb Williams", pos:"QB", grade: 99},
+  {name:"Drake Maye", pos:"QB", grade: 95},
+  {name:"Marvin Harrison Jr", pos:"WR", grade: 98},
+  {name:"Joe Alt", pos:"OT", grade: 94},
+  {name:"Dallas Turner", pos:"EDGE", grade: 93},
+  {name:"Malik Nabers", pos:"WR", grade: 96},
+  {name:"Rome Odunze", pos:"WR", grade: 95}
+];
+
+let pick = 0;
+let started = false;
+
+const needs = {
+  "Panthers": ["QB","WR"],
+  "Commanders": ["QB","OL"],
+  "Patriots": ["QB","WR"],
+  "Cardinals": ["WR","EDGE"],
+  "Chargers": ["WR","CB"],
+  "Giants": ["QB","OL"],
+  "Titans": ["OL","WR"],
+  "Falcons": ["QB","EDGE"],
+  "Bears": ["WR","OL"],
+  "Jets": ["OL","WR"]
+};
+
+document.getElementById("startBtn").onclick = () => {
+  started = true;
+  updateStatus();
+  renderPlayers();
+  nextPick();
+};
+
+document.getElementById("simBtn").onclick = simToUserPick;
+
+function updateStatus() {
+  if(pick >= teams.length) {
+    document.getElementById("status").innerText = "Draft Complete";
+    return;
+  }
+
+  let team = teams[pick];
+  document.getElementById("status").innerText = `${team} are on the clock`;
+}
+
+function renderPlayers() {
+  let container = document.getElementById("players");
+  container.innerHTML = "";
+
+  players.sort((a,b) => b.grade - a.grade);
+
+  players.forEach((p, i) => {
+    let div = document.createElement("div");
+    div.className = "p-2 border-b border-gray-700 cursor-pointer hover:bg-gray-700";
+
+    div.innerHTML = `<strong>${p.name}</strong> (${p.pos}) - ${p.grade}`;
+
+    div.onclick = () => {
+      if(teams[pick] !== userTeam) return;
+      draftPlayer(i);
+    };
+
+    container.appendChild(div);
+  });
+}
+
+function draftPlayer(index) {
+  let team = teams[pick];
+  let player = players.splice(index,1)[0];
+
+  document.getElementById("board").innerHTML +=
+    `<p class="mb-1">${pick+1}. ${team} - ${player.name} (${player.pos})</p>`;
+
+  pick++;
+  updateStatus();
+
+  setTimeout(nextPick, 300);
+}
+
+function nextPick() {
+  if(!started || pick >= teams.length) return;
+
+  let team = teams[pick];
+
+  if(team !== userTeam) {
+    cpuPick(team);
+  }
+}
+
+function cpuPick(team) {
+
+  let teamNeeds = needs[team] || [];
+
+  let best = players
+    .map((p,i) => {
+      let score = p.grade;
+      if(teamNeeds.includes(p.pos)) score += 5;
+      return {p,i,score};
+    })
+    .sort((a,b) => b.score - a.score)[0];
+
+  draftPlayer(best.i);
+}
+
+function simToUserPick() {
+  while(teams[pick] !== userTeam && pick < teams.length) {
+    cpuPick(teams[pick]);
+  }
+}
+
+</script>
+
+</body>
+</html>
