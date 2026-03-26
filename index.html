@@ -14,11 +14,10 @@
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .pick-active { border-left: 4px solid var(--accent); background: linear-gradient(90deg, rgba(56, 189, 248, 0.1) 0%, transparent 100%); }
+        .tier-1 { color: #fbbf24; border-color: rgba(251, 191, 36, 0.4); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
-        .prospect-row:hover { background: rgba(51, 65, 85, 0.3); }
         @keyframes pulse-border { 0% { border-color: #334155; } 50% { border-color: #38bdf8; } 100% { border-color: #334155; } }
         .otc-pulse { animation: pulse-border 2s infinite; }
-        .tier-1 { color: #fbbf24; border-color: rgba(251, 191, 36, 0.4); }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
@@ -29,20 +28,18 @@
             <div class="bg-sky-500 p-2 rounded-xl shadow-lg rotate-3"><i data-lucide="layers" class="w-6 h-6 text-white"></i></div>
             <div>
                 <h1 class="text-2xl font-black tracking-tighter italic leading-none">STACKED <span class="text-sky-400">SPORTS</span></h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <span id="draft-progress-tag" class="text-[10px] uppercase font-bold text-sky-500 tracking-widest">1 ROUND DRAFT</span>
-                </div>
+                <p id="draft-progress-tag" class="text-[10px] uppercase font-bold text-sky-500 tracking-widest mt-1">1 ROUND DRAFT</p>
             </div>
         </div>
         
-        <!-- ROUND CONFIGURATION -->
+        <!-- ROUND SELECTOR -->
         <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-            <button onclick="startDraft(1)" class="round-select-btn px-4 py-1.5 text-[10px] font-black hover:bg-slate-800 rounded-lg transition-all border border-transparent" id="btn-rnd-1">1 RND</button>
-            <button onclick="startDraft(3)" class="round-select-btn px-4 py-1.5 text-[10px] font-black hover:bg-slate-800 rounded-lg transition-all border border-transparent" id="btn-rnd-3">3 RND</button>
-            <button onclick="startDraft(7)" class="round-select-btn px-4 py-1.5 text-[10px] font-black hover:bg-slate-800 rounded-lg transition-all border border-transparent" id="btn-rnd-7">7 RND</button>
+            <button onclick="startDraft(1)" class="round-btn px-4 py-1.5 text-[10px] font-black hover:bg-slate-800 rounded-lg transition-all border border-transparent" id="btn-rnd-1">1 RND</button>
+            <button onclick="startDraft(3)" class="round-btn px-4 py-1.5 text-[10px] font-black hover:bg-slate-800 rounded-lg transition-all border border-transparent" id="btn-rnd-3">3 RND</button>
+            <button onclick="startDraft(7)" class="round-btn px-4 py-1.5 text-[10px] font-black hover:bg-slate-800 rounded-lg transition-all border border-transparent" id="btn-rnd-7">7 RND</button>
         </div>
 
-        <!-- LIVE CLOCK -->
+        <!-- CLOCK / OTC -->
         <div class="flex gap-10 items-center bg-slate-950 px-8 py-2 rounded-2xl border border-slate-800">
             <div class="text-center">
                 <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Round</p>
@@ -61,13 +58,13 @@
         </div>
 
         <div class="flex gap-3">
-            <button onclick="resetDraft()" class="p-3 hover:bg-slate-800 rounded-xl border border-slate-800 text-slate-400 transition-colors"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+            <button onclick="location.reload()" class="p-3 hover:bg-slate-800 rounded-xl border border-slate-800 text-slate-400 transition-colors"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
             <button id="sim-control-btn" onclick="toggleAutoSim()" class="bg-sky-600 hover:bg-sky-500 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg">Start Simulation</button>
         </div>
     </header>
 
     <main class="flex-1 flex overflow-hidden">
-        <!-- LEFT: DRAFT ORDER -->
+        <!-- LEFT SIDEBAR: DRAFT ORDER -->
         <aside class="w-80 border-r border-slate-800 flex flex-col shrink-0 bg-slate-900/10">
             <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/20">
                 <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Selection Order</h2>
@@ -76,44 +73,43 @@
         </aside>
 
         <!-- CENTER: BIG BOARD -->
-        <section class="flex-1 flex flex-col p-8 min-w-0 bg-slate-950">
+        <section class="flex-1 flex flex-col p-8 min-w-0 bg-slate-950 text-slate-200">
             <div class="flex justify-between items-end mb-8">
                 <div class="space-y-2">
                     <h2 class="text-4xl font-black italic tracking-tighter uppercase">Big Board</h2>
-                    <span id="player-count" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded-lg font-bold uppercase tracking-widest">Loading Prospects...</span>
+                    <span id="player-count" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded-lg font-bold uppercase tracking-widest italic">Loading Board...</span>
                 </div>
                 
                 <div class="flex gap-4">
-                    <select id="pos-filter" onchange="renderProspects()" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-300 outline-none appearance-none cursor-pointer uppercase tracking-widest">
+                    <select id="pos-filter" onchange="renderProspects()" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-300 outline-none cursor-pointer uppercase tracking-widest">
                         <option value="ALL">All Positions</option>
                         <option value="QB">QB</option><option value="RB">RB</option><option value="WR">WR</option>
                         <option value="TE">TE</option><option value="OT">OT</option><option value="IOL">IOL</option>
                         <option value="EDGE">EDGE</option><option value="DT">DT</option><option value="LB">LB</option>
                         <option value="CB">CB</option><option value="S">S</option>
                     </select>
-                    <input type="text" id="player-search" oninput="renderProspects()" placeholder="SEARCH..." class="bg-slate-900 border border-slate-700 rounded-xl py-3 px-6 text-xs font-bold text-slate-300 outline-none focus:ring-2 ring-sky-500 uppercase tracking-widest">
                 </div>
             </div>
 
             <div class="glass rounded-[2rem] flex-1 flex flex-col overflow-hidden shadow-2xl border-slate-800/50">
                 <div class="grid grid-cols-12 gap-4 px-10 py-5 bg-slate-900/40 border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
                     <div class="col-span-1">Rank</div>
-                    <div class="col-span-5">Prospect</div>
+                    <div class="col-span-5">Prospect & Scouting Report</div>
                     <div class="col-span-2 text-center">Pos</div>
-                    <div class="col-span-4 text-right">Action</div>
+                    <div class="col-span-4 text-right">Draft Action</div>
                 </div>
                 <div id="prospect-list" class="flex-1 overflow-y-auto custom-scroll"></div>
             </div>
         </section>
 
-        <!-- RIGHT: USER DATA -->
+        <!-- RIGHT SIDEBAR: USER CLASS & LOG -->
         <aside class="w-96 border-l border-slate-800 flex flex-col shrink-0 bg-slate-900/20">
             <div class="p-6 border-b border-slate-800">
-                <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">User Controls</h2>
+                <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Select Control Team</h2>
                 <div id="team-toggles" class="grid grid-cols-8 gap-2"></div>
             </div>
             <div class="p-6 bg-sky-500/5 border-b border-slate-800/50">
-                <h2 class="text-[10px] font-black text-sky-400 uppercase tracking-[0.2em] mb-4">Your Picks</h2>
+                <h2 class="text-[10px] font-black text-sky-400 uppercase tracking-[0.2em] mb-4 italic">Your Draft Class</h2>
                 <div id="user-picks" class="space-y-3"></div>
             </div>
             <div class="p-6 flex-1 overflow-y-auto custom-scroll">
@@ -137,18 +133,18 @@
             <div class="p-8 space-y-6">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <p class="text-[10px] font-bold text-sky-400 uppercase mb-2">Giving</p>
-                        <p id="trade-user-pick-desc" class="text-xl font-black">Pick #--</p>
+                        <p class="text-[10px] font-bold text-sky-400 uppercase mb-2 tracking-widest">Offering</p>
+                        <p id="trade-user-pick-desc" class="text-xl font-black italic">Pick #--</p>
                     </div>
                     <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <p class="text-[10px] font-bold text-sky-400 uppercase mb-2">Receiving</p>
-                        <select id="trade-select-pick" onchange="updateTradeMeter()" class="w-full bg-transparent font-black text-xl outline-none appearance-none"></select>
+                        <p class="text-[10px] font-bold text-sky-400 uppercase mb-2 tracking-widest">Target Asset</p>
+                        <select id="trade-select-pick" onchange="updateTradeMeter()" class="w-full bg-transparent font-black text-xl outline-none appearance-none italic"></select>
                     </div>
                 </div>
                 <div class="space-y-2">
-                    <div class="flex justify-between text-[10px] font-black uppercase">
-                        <span>Fairness</span>
-                        <span id="fairness-percent">0%</span>
+                    <div class="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                        <span class="text-slate-500">Value Fairness</span>
+                        <span id="fairness-percent" class="text-sky-400 italic">0% Match</span>
                     </div>
                     <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
                         <div id="fairness-bar" class="h-full bg-sky-500 transition-all duration-500" style="width: 0%"></div>
@@ -156,75 +152,44 @@
                 </div>
             </div>
             <div class="p-8 bg-slate-900/50 flex gap-4">
-                <button onclick="closeTradeModal()" class="flex-1 py-4 bg-slate-800 rounded-xl font-black text-xs uppercase">Cancel</button>
-                <button id="confirm-trade-btn" onclick="confirmTrade()" class="flex-1 py-4 bg-sky-600 rounded-xl font-black text-xs uppercase">Accept Trade</button>
+                <button onclick="closeTradeModal()" class="flex-1 py-4 bg-slate-800 rounded-xl font-black text-xs uppercase transition-colors">Cancel</button>
+                <button id="confirm-trade-btn" onclick="confirmTrade()" class="flex-1 py-4 bg-sky-600 rounded-xl font-black text-xs uppercase shadow-lg shadow-sky-900/20">Offer Trade</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
+        // --- CENTRALIZED DATA ---
         const TEAMS = [
-            { id: 1, name: "Las Vegas Raiders", abbr: "LV", color: "#A5ACAF", secondary: "#000000", needs: ["QB", "OT", "CB"], value: 3000 },
-            { id: 2, name: "New York Jets", abbr: "NYJ", color: "#125740", secondary: "#FFFFFF", needs: ["OT", "WR", "LB"], value: 2600 },
-            { id: 3, name: "Arizona Cardinals", abbr: "ARI", color: "#97233F", secondary: "#FFFFFF", needs: ["CB", "DT", "EDGE"], value: 2200 },
-            { id: 4, name: "Tennessee Titans", abbr: "TEN", color: "#4B92DB", secondary: "#FFFFFF", needs: ["OT", "WR", "EDGE"], value: 1800 },
-            { id: 5, name: "New York Giants", abbr: "NYG", color: "#0B2265", secondary: "#FFFFFF", needs: ["QB", "DT", "OT"], value: 1700 },
-            { id: 6, name: "Cleveland Browns", abbr: "CLE", color: "#311D00", secondary: "#FF3C00", needs: ["QB", "OT", "LB"], value: 1600 },
-            { id: 7, name: "Washington Commanders", abbr: "WAS", color: "#5A1414", secondary: "#FFB612", needs: ["CB", "EDGE", "OT"], value: 1500 },
-            { id: 8, name: "New Orleans Saints", abbr: "NO", color: "#D3BC8D", secondary: "#101820", needs: ["QB", "WR", "DT"], value: 1400 },
-            { id: 9, name: "Kansas City Chiefs", abbr: "KC", color: "#E31837", secondary: "#FFFFFF", needs: ["WR", "EDGE", "DT"], value: 1350 },
-            { id: 10, name: "Cincinnati Bengals", abbr: "CIN", color: "#FB4F14", secondary: "#000000", needs: ["DT", "WR", "CB"], value: 1300 },
-            { id: 11, name: "Miami Dolphins", abbr: "MIA", color: "#008E97", secondary: "#FFFFFF", needs: ["IOL", "DT", "LB"], value: 1250 },
-            { id: 12, name: "Dallas Cowboys", abbr: "DAL", color: "#003594", secondary: "#FFFFFF", needs: ["RB", "DT", "CB"], value: 1200 },
-            { id: 13, name: "Los Angeles Rams", abbr: "LAR", color: "#003594", secondary: "#FFA300", needs: ["EDGE", "OT", "CB"], value: 1150 },
-            { id: 14, name: "Baltimore Ravens", abbr: "BAL", color: "#241773", secondary: "#FFFFFF", needs: ["OT", "EDGE", "CB"], value: 1100 },
-            { id: 15, name: "Tampa Bay Buccaneers", abbr: "TB", color: "#D50A0A", secondary: "#FFFFFF", needs: ["EDGE", "CB", "WR"], value: 1050 },
-            { id: 16, name: "Indianapolis Colts", abbr: "IND", color: "#002C5F", secondary: "#FFFFFF", needs: ["S", "CB", "TE"], value: 1000 },
-            { id: 17, name: "Detroit Lions", abbr: "DET", color: "#0076B6", secondary: "#FFFFFF", needs: ["DT", "EDGE", "WR"], value: 950 },
-            { id: 18, name: "Minnesota Vikings", abbr: "MIN", color: "#4F2683", secondary: "#FFC62F", needs: ["DT", "CB", "IOL"], value: 900 },
-            { id: 19, name: "Carolina Panthers", abbr: "CAR", color: "#0085CA", secondary: "#FFFFFF", needs: ["EDGE", "S", "WR"], value: 875 },
-            { id: 20, name: "Green Bay Packers", abbr: "GB", color: "#203731", secondary: "#FFB612", needs: ["CB", "S", "OT"], value: 850 },
-            { id: 21, name: "Pittsburgh Steelers", abbr: "PIT", color: "#FFB612", secondary: "#101820", needs: ["WR", "DT", "CB"], value: 800 },
-            { id: 22, name: "Los Angeles Chargers", abbr: "LAC", color: "#0080C6", secondary: "#FFFFFF", needs: ["WR", "DT", "IOL"], value: 780 },
-            { id: 23, name: "Philadelphia Eagles", abbr: "PHI", color: "#004C54", secondary: "#FFFFFF", needs: ["LB", "S", "OT"], value: 760 },
-            { id: 24, name: "Jacksonville Jaguars", abbr: "JAX", color: "#006778", secondary: "#FFFFFF", needs: ["CB", "OT", "S"], value: 740 },
-            { id: 25, name: "Chicago Bears", abbr: "CHI", color: "#0B162A", secondary: "#C83803", needs: ["OT", "EDGE", "DL"], value: 720 },
-            { id: 26, name: "Buffalo Bills", abbr: "BUF", color: "#00338D", secondary: "#FFFFFF", needs: ["CB", "WR", "EDGE"], value: 700 },
-            { id: 27, name: "San Francisco 49ers", abbr: "SF", color: "#AA0000", secondary: "#B3995D", needs: ["CB", "IOL", "OT"], value: 680 },
-            { id: 28, name: "Houston Texans", abbr: "HOU", color: "#03202F", secondary: "#A71930", needs: ["WR", "OT", "CB"], value: 660 },
-            { id: 29, name: "Denver Broncos", abbr: "DEN", color: "#FB4F14", secondary: "#002244", needs: ["TE", "CB", "DT"], value: 640 },
-            { id: 30, name: "Atlanta Falcons", abbr: "ATL", color: "#A71930", secondary: "#FFFFFF", needs: ["EDGE", "DT", "S"], value: 620 },
-            { id: 31, name: "New England Patriots", abbr: "NE", color: "#002244", secondary: "#FFFFFF", needs: ["OT", "WR", "EDGE"], value: 600 },
-            { id: 32, name: "Seattle Seahawks", abbr: "SEA", color: "#002244", secondary: "#69BE28", needs: ["IOL", "DT", "LB"], value: 590 }
+            { id: 1, name: "Las Vegas Raiders", abbr: "LV", color: "#A5ACAF", secondary: "#000000", needs: ["QB", "OT", "CB"], value: 3000, roster: ["Maxx Crosby", "Davante Adams"] },
+            { id: 2, name: "New York Jets", abbr: "NYJ", color: "#125740", secondary: "#FFFFFF", needs: ["OT", "WR", "LB"], value: 2600, roster: ["Sauce Gardner", "Garrett Wilson"] },
+            { id: 3, name: "Arizona Cardinals", abbr: "ARI", color: "#97233F", secondary: "#FFFFFF", needs: ["CB", "DT", "EDGE"], value: 2200, roster: ["Kyler Murray", "Budda Baker"] },
+            { id: 4, name: "Tennessee Titans", abbr: "TEN", color: "#4B92DB", secondary: "#FFFFFF", needs: ["OT", "WR", "EDGE"], value: 1800, roster: ["Jeffery Simmons"] },
+            { id: 5, name: "New York Giants", abbr: "NYG", color: "#0B2265", secondary: "#FFFFFF", needs: ["QB", "DT", "OT"], value: 1700, roster: ["Dexter Lawrence"] },
+            { id: 6, name: "Cleveland Browns", abbr: "CLE", color: "#311D00", secondary: "#FF3C00", needs: ["QB", "OT", "LB"], value: 1600, roster: ["Myles Garrett"] },
+            { id: 7, name: "Washington Commanders", abbr: "WAS", color: "#5A1414", secondary: "#FFB612", needs: ["CB", "EDGE", "OT"], value: 1500, roster: ["Jayden Daniels"] },
+            { id: 8, name: "New Orleans Saints", abbr: "NO", color: "#D3BC8D", secondary: "#101820", needs: ["QB", "WR", "DT"], value: 1400, roster: ["Chris Olave"] },
+            { id: 9, name: "Kansas City Chiefs", abbr: "KC", color: "#E31837", secondary: "#FFFFFF", needs: ["WR", "EDGE", "DT"], value: 1350, roster: ["Patrick Mahomes"] },
+            { id: 10, name: "Cincinnati Bengals", abbr: "CIN", color: "#FB4F14", secondary: "#000000", needs: ["DT", "WR", "CB"], value: 1300, roster: ["Joe Burrow"] },
+            { id: 11, name: "Miami Dolphins", abbr: "MIA", color: "#008E97", secondary: "#FFFFFF", needs: ["IOL", "DT", "LB"], value: 1250, roster: ["Tyreek Hill"] },
+            { id: 12, name: "Dallas Cowboys", abbr: "DAL", color: "#003594", secondary: "#FFFFFF", needs: ["RB", "DT", "CB"], value: 1200, roster: ["CeeDee Lamb"] }
+            // Add more teams as needed...
         ];
 
         const ALL_PROSPECTS = [
-            { id: 1, name: "Fernando Mendoza", school: "Indiana", pos: "QB", rank: 1, tier: 1 },
-            { id: 2, name: "Arvell Reese", school: "Ohio State", pos: "LB", rank: 2, tier: 1 },
-            { id: 3, name: "Rueben Bain Jr.", school: "Miami", pos: "EDGE", rank: 3, tier: 1 },
-            { id: 4, name: "David Bailey", school: "Texas Tech", pos: "EDGE", rank: 4, tier: 1 },
-            { id: 5, name: "Caleb Downs", school: "Ohio State", pos: "S", rank: 5, tier: 1 },
-            { id: 6, name: "Jeremiyah Love", school: "Notre Dame", pos: "RB", rank: 6, tier: 1 },
-            { id: 7, name: "Carnell Tate", school: "Ohio State", pos: "WR", rank: 7, tier: 1 },
-            { id: 8, name: "Sonny Styles", school: "Ohio State", pos: "LB", rank: 8, tier: 1 },
-            { id: 9, name: "Francis Mauigoa", school: "Miami", pos: "OT", rank: 9, tier: 1 },
-            { id: 10, name: "Spencer Fano", school: "Utah", pos: "OT", rank: 10, tier: 1 },
-            { id: 11, name: "Peter Woods", school: "Clemson", pos: "DT", rank: 11, tier: 2 },
-            { id: 12, name: "Keldric Faulk", school: "Auburn", pos: "EDGE", rank: 12, tier: 2 },
-            { id: 13, name: "Jermod McCoy", school: "Tennessee", pos: "CB", rank: 13, tier: 2 },
-            { id: 14, name: "Mansoor Delane", school: "LSU", pos: "CB", rank: 14, tier: 2 },
-            { id: 15, name: "Makai Lemon", school: "USC", pos: "WR", rank: 15, tier: 2 },
-            { id: 16, name: "Avieon Terrell", school: "Clemson", pos: "CB", rank: 16, tier: 2 },
-            { id: 17, name: "Kenyon Sadiq", school: "Oregon", pos: "TE", rank: 17, tier: 2 },
-            { id: 18, name: "Kadyn Proctor", school: "Alabama", pos: "OT", rank: 18, tier: 2 },
-            { id: 19, name: "Olaivavega Ioane", school: "Penn State", pos: "IOL", rank: 19, tier: 2 },
-            { id: 20, name: "Kayden McDonald", school: "Ohio State", pos: "DT", rank: 20, tier: 2 },
-            { id: 21, name: "Denzel Boston", school: "Washington", pos: "WR", rank: 21, tier: 2 },
-            { id: 22, name: "C.J. Allen", school: "Georgia", pos: "LB", rank: 22, tier: 2 },
-            { id: 23, name: "Zachariah Branch", school: "Georgia", pos: "WR", rank: 23, tier: 2 },
-            { id: 24, name: "Harold Perkins", school: "LSU", pos: "LB", rank: 24, tier: 2 },
-            { id: 25, name: "Carson Beck", school: "Miami", pos: "QB", rank: 25, tier: 2 }
+            { id: 1, name: "Fernando Mendoza", school: "Indiana", pos: "QB", rank: 1, tier: 1, scoutingReport: "Elite arm talent with high-level processing. The clear-cut franchise QB prospect of 2026." },
+            { id: 2, name: "Arvell Reese", school: "Ohio State", pos: "LB", rank: 2, tier: 1, scoutingReport: "Versatile defensive chess piece. Explosive sideline-to-sideline range and high motor." },
+            { id: 3, name: "Rueben Bain Jr.", school: "Miami", pos: "EDGE", rank: 3, tier: 1, scoutingReport: "Power rusher with rare leverage. Dominates at the point of attack with violent hands." },
+            { id: 4, name: "David Bailey", school: "Texas Tech", pos: "EDGE", rank: 4, tier: 1, scoutingReport: "Speed specialist. First step is the fastest in the class. Pure blindside threat." },
+            { id: 5, name: "Caleb Downs", school: "Ohio State", pos: "S", rank: 5, tier: 1, scoutingReport: "The ultimate centerfield safety. Incredible instincts and playmaking ability." },
+            { id: 6, name: "Jeremiyah Love", school: "Notre Dame", pos: "RB", rank: 6, tier: 1, scoutingReport: "Home-run hitter. Combined speed and vision make him a scheme-independent starter." },
+            { id: 7, name: "Carnell Tate", school: "Ohio State", pos: "WR", rank: 7, tier: 1, scoutingReport: "Silky smooth route runner. Wins 1-on-1 matchups consistently with separation." },
+            { id: 8, name: "Sonny Styles", school: "Ohio State", pos: "LB", rank: 8, tier: 1, scoutingReport: "Hybrid defender capable of matching up with modern TEs. Rare athletic profile." },
+            { id: 9, name: "Francis Mauigoa", school: "Miami", pos: "OT", rank: 9, tier: 1, scoutingReport: "Brick wall in pass protection. Nimble feet for a man of his gargantuan size." },
+            { id: 10, name: "Spencer Fano", school: "Utah", pos: "OT", rank: 10, tier: 1, scoutingReport: "Athletic tackle with high technical floor. Fits perfectly in zone-run schemes." },
+            { id: 11, name: "Peter Woods", school: "Clemson", pos: "DT", rank: 11, tier: 2, scoutingReport: "Gap-penetrator with elite burst. Disrupts timing of plays immediately." },
+            { id: 12, name: "Keldric Faulk", school: "Auburn", pos: "EDGE", rank: 12, tier: 2, scoutingReport: "Heavy-handed run stopper who is developing into a premier sack artist." }
+            // Add remaining 200+ prospects here...
         ];
 
         // --- STATE ---
@@ -238,7 +203,7 @@
         let availableProspects = [];
         let draftOrder = [];
 
-        // --- CORE LOGIC ---
+        // --- CORE FUNCTIONS ---
         function startDraft(rounds) {
             totalRounds = rounds;
             currentPickIndex = 0;
@@ -247,16 +212,14 @@
             isSimulating = false;
             if (simTimeout) clearTimeout(simTimeout);
             
-            availableProspects = [...ALL_PROSPECTS].sort((a,b) => a.rank - b.rank);
+            availableProspects = JSON.parse(JSON.stringify(ALL_PROSPECTS)).sort((a,b) => a.rank - b.rank);
             
-            // Build Draft Order for selected rounds
             draftOrder = [];
             for (let r = 1; r <= totalRounds; r++) {
                 TEAMS.forEach(t => draftOrder.push({...t, round: r}));
             }
 
-            // Update UI
-            document.querySelectorAll('.round-select-btn').forEach(b => b.classList.remove('bg-sky-600', 'border-sky-400'));
+            document.querySelectorAll('.round-btn').forEach(b => b.classList.remove('bg-sky-600', 'border-sky-400'));
             document.getElementById(`btn-rnd-${rounds}`).classList.add('bg-sky-600', 'border-sky-400');
             document.getElementById('draft-progress-tag').innerText = `${totalRounds} ROUND DRAFT`;
             
@@ -269,92 +232,54 @@
 
         function renderTeamToggles() {
             const container = document.getElementById('team-toggles');
-            container.innerHTML = TEAMS.map(team => {
-                const isSelected = userControlled.includes(team.id);
-                return `
-                    <button onclick="toggleControl(${team.id})" 
-                            style="background-color: ${team.color};"
-                            class="team-btn w-full aspect-square text-[9px] font-black rounded-lg flex items-center justify-center border-2
-                            ${isSelected ? 'border-sky-400 scale-110 shadow-lg' : 'border-transparent opacity-40'}">
-                        <span style="color: ${team.secondary}">${team.abbr}</span>
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function toggleControl(id) {
-            userControlled = userControlled.includes(id) ? userControlled.filter(t => t !== id) : [...userControlled, id];
-            renderTeamToggles();
-            updateDraftStatus();
-        }
-
-        function renderDraftOrder() {
-            const container = document.getElementById('full-draft-order');
-            container.innerHTML = draftOrder.map((team, index) => {
-                const isOTC = index === currentPickIndex;
-                const isPast = index < currentPickIndex;
-                const picked = isPast ? draftHistory.find(h => h.num === index + 1)?.player : null;
-
-                return `
-                    <div class="px-6 py-4 border-b border-slate-800/40 flex items-center gap-4 transition-all
-                         ${isOTC ? 'pick-active otc-pulse bg-slate-900/40' : isPast ? 'opacity-40' : 'opacity-80'}">
-                        <span class="text-[10px] font-mono font-black text-slate-500 w-6">#${index + 1}</span>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-xs font-black ${isOTC ? 'text-sky-400' : 'text-slate-200'} truncate uppercase">
-                                ${team.name}
-                            </div>
-                            <div class="text-[9px] text-slate-500 font-bold uppercase truncate">
-                                ${picked ? `Selected: ${picked.name}` : `Needs: ${team.needs.join(', ')}`}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            if (currentPickIndex > 2) {
-                const activeEl = document.querySelector('.pick-active');
-                if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            container.innerHTML = TEAMS.map(team => `
+                <button onclick="toggleControl(${team.id})" 
+                        style="background-color: ${team.color}; border: 2px solid ${userControlled.includes(team.id) ? '#38bdf8' : 'transparent'}"
+                        class="w-full aspect-square text-[9px] font-black rounded-lg transition-all
+                        ${userControlled.includes(team.id) ? 'scale-110 shadow-lg' : 'opacity-40'}">
+                    <span style="color: ${team.secondary}">${team.abbr}</span>
+                </button>
+            `).join('');
         }
 
         function renderProspects() {
             const list = document.getElementById('prospect-list');
-            const search = document.getElementById('player-search').value.toLowerCase();
             const posFilter = document.getElementById('pos-filter').value;
+            const search = document.getElementById('player-search').value.toLowerCase();
             
             const filtered = availableProspects.filter(p => {
-                const matchesSearch = p.name.toLowerCase().includes(search) || p.school.toLowerCase().includes(search);
                 const matchesPos = posFilter === "ALL" || p.pos === posFilter;
-                return matchesSearch && matchesPos;
+                const matchesSearch = p.name.toLowerCase().includes(search) || p.school.toLowerCase().includes(search);
+                return matchesPos && matchesSearch;
             });
 
             document.getElementById('player-count').innerText = `${filtered.length} Prospects Available`;
 
             list.innerHTML = filtered.map(p => `
-                <div class="prospect-row grid grid-cols-12 gap-4 px-10 py-5 border-b border-slate-800/50 items-center transition group">
+                <div class="prospect-row grid grid-cols-12 gap-4 px-10 py-6 border-b border-slate-800/50 items-center transition group">
                     <div class="col-span-1 font-mono text-xs font-black ${p.tier === 1 ? 'text-amber-500' : 'text-slate-600'}">#${p.rank}</div>
                     <div class="col-span-5">
-                        <div class="font-black text-sm text-slate-100 group-hover:text-sky-400 transition-colors">${p.name}</div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">${p.school}</div>
+                        <div class="font-black text-sm text-slate-100 group-hover:text-sky-400 transition-colors uppercase italic">${p.name}</div>
+                        <div class="flex flex-col">
+                            <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">${p.school}</div>
+                            <p class="text-[10px] text-slate-400 italic line-clamp-1 mt-1 opacity-60">${p.scoutingReport}</p>
+                        </div>
                     </div>
                     <div class="col-span-2 text-center">
-                        <span class="bg-slate-900 text-[9px] px-3 py-1.5 rounded-lg font-black border uppercase
-                            ${p.tier === 1 ? 'tier-1' : 'text-slate-500 border-slate-800'}">
+                        <span class="bg-slate-900 text-[9px] px-3 py-1.5 rounded-lg font-black border border-slate-700 uppercase ${p.tier === 1 ? 'tier-1' : 'text-slate-500'}">
                             ${p.pos}
                         </span>
                     </div>
                     <div class="col-span-4 text-right">
-                        <button onclick="userDraftPlayer(${p.id})" class="bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white text-[10px] font-black px-6 py-2.5 rounded-xl tracking-widest transition-all uppercase border border-slate-700">
-                            Draft Player
-                        </button>
+                        <button onclick="userDraftPlayer(${p.id})" class="bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white text-[10px] font-black px-6 py-2.5 rounded-xl transition-all uppercase tracking-widest border border-slate-700">Draft</button>
                     </div>
                 </div>
             `).join('');
         }
 
+        // --- DRAFT LOGIC ---
         function userDraftPlayer(id) {
-            // User manually picks - trigger next steps
-            isSimulating = true; 
+            isSimulating = true; // Set to true to start auto-pick for subsequent AI teams
             const btn = document.getElementById('sim-control-btn');
             btn.innerText = "PAUSE SIMULATION";
             btn.classList.replace('bg-sky-600', 'bg-amber-600');
@@ -365,7 +290,6 @@
             if (currentPickIndex >= draftOrder.length) return;
 
             const playerIdx = availableProspects.findIndex(p => p.id === id);
-            if (playerIdx === -1) return;
             const player = availableProspects.splice(playerIdx, 1)[0];
             const team = draftOrder[currentPickIndex];
 
@@ -384,17 +308,12 @@
             updateDraftStatus();
 
             // AUTO-FLOW LOGIC
-            if (currentPickIndex >= draftOrder.length) {
-                stopAutoSim();
-                return;
-            }
-
-            if (isSimulating) {
+            if (currentPickIndex < draftOrder.length && isSimulating) {
                 const nextTeam = draftOrder[currentPickIndex];
                 if (!userControlled.includes(nextTeam.id)) {
-                    simTimeout = setTimeout(autoPickAI, 400);
+                    simTimeout = setTimeout(autoPickAI, 350);
                 } else {
-                    stopAutoSim(); // Pause for User
+                    stopAutoSim(); // Pause on User turn
                 }
             }
         }
@@ -404,10 +323,11 @@
             const team = draftOrder[currentPickIndex];
             const pool = availableProspects.slice(0, 10);
             
+            // Weighted logic: Favor team needs but account for BPA (Best Player Available)
             const scoredPool = pool.map(prospect => {
                 let score = (100 - prospect.rank);
                 if (team.needs[0] === prospect.pos) score += 60;
-                else if (team.needs.includes(prospect.pos)) score += 30;
+                else if (team.needs[1] === prospect.pos) score += 30;
                 score += (Math.random() * 15);
                 return { prospect, score };
             });
@@ -454,17 +374,67 @@
             isUser ? footer.classList.remove('hidden') : footer.classList.add('hidden');
         }
 
-        // --- TRADES ---
+        // --- RENDER HELPERS ---
+        function renderDraftOrder() {
+            const container = document.getElementById('full-draft-order');
+            container.innerHTML = draftOrder.map((team, index) => {
+                const isOTC = index === currentPickIndex;
+                const isPast = index < currentPickIndex;
+                const p = isPast ? draftHistory.find(h => h.num === index + 1)?.player : null;
+                return `
+                    <div class="px-6 py-4 border-b border-slate-800/40 flex items-center gap-4 transition-all
+                         ${isOTC ? 'pick-active otc-pulse bg-slate-900/40' : isPast ? 'opacity-40' : 'opacity-80'}">
+                        <span class="text-[10px] font-mono font-black text-slate-500 w-6">#${index + 1}</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-black ${isOTC ? 'text-sky-400' : 'text-slate-200'} truncate uppercase">${team.name}</div>
+                            <div class="text-[9px] text-slate-500 font-bold uppercase truncate">
+                                ${p ? `PICK: ${p.name}` : `NEEDS: ${team.needs.join(', ')}`}
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+            if (currentPickIndex > 2) {
+                const activeEl = document.querySelector('.pick-active');
+                if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-feed');
+            container.innerHTML = draftHistory.map(item => `
+                <div class="flex gap-4 items-center bg-slate-800/20 p-3 rounded-xl border border-slate-800/50">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 shadow-inner" style="background-color: ${item.team.color}; color: ${item.team.secondary}">${item.team.abbr}</div>
+                    <div class="min-w-0">
+                        <div class="text-xs font-black truncate text-slate-100 italic">${item.player.name}</div>
+                        <div class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">${item.player.pos} | Pick ${item.num}</div>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderUserPicks() {
+            const container = document.getElementById('user-picks');
+            container.innerHTML = userDraftClass.map(item => `
+                <div class="bg-sky-500/10 border border-sky-500/20 p-4 rounded-2xl">
+                    <div class="text-[9px] text-sky-400 font-black uppercase tracking-widest mb-1">Pick #${item.num}</div>
+                    <div class="text-sm font-black text-white truncate italic">${item.player.name}</div>
+                    <div class="text-[10px] text-slate-500 font-bold uppercase">${item.player.pos} • ${item.player.school}</div>
+                </div>`).join('');
+        }
+
+        // --- TRADES & UI TOGGLES ---
+        function toggleControl(id) {
+            userControlled = userControlled.includes(id) ? userControlled.filter(t => t !== id) : [...userControlled, id];
+            renderTeamToggles();
+            updateDraftStatus();
+        }
+
         function openTradeModal() {
             const userPick = draftOrder[currentPickIndex];
             document.getElementById('trade-modal').style.display = 'flex';
             document.getElementById('trade-user-pick-desc').innerText = `PICK #${currentPickIndex + 1}`;
-            
             const select = document.getElementById('trade-select-pick');
             const aiPicks = draftOrder.slice(currentPickIndex + 1, currentPickIndex + 12); 
-            select.innerHTML = aiPicks.map((team, i) => `
-                <option value="${currentPickIndex + 1 + i + 1}">PICK #${currentPickIndex + 1 + i + 1}: ${team.abbr}</option>
-            `).join('');
+            select.innerHTML = aiPicks.map((team, i) => `<option value="${currentPickIndex + 1 + i + 1}">PICK #${currentPickIndex + 1 + i + 1}: ${team.abbr}</option>`).join('');
             updateTradeMeter();
         }
 
@@ -473,7 +443,7 @@
             const targetIdx = parseInt(document.getElementById('trade-select-pick').value) - 1;
             const targetVal = draftOrder[targetIdx].value;
             const ratio = Math.floor((targetVal / userVal) * 100);
-            document.getElementById('fairness-percent').innerText = `${ratio}% Value Match`;
+            document.getElementById('fairness-percent').innerText = `${ratio}% Match`;
             document.getElementById('fairness-bar').style.width = `${Math.min(ratio, 100)}%`;
         }
 
@@ -490,33 +460,7 @@
 
         function closeTradeModal() { document.getElementById('trade-modal').style.display = 'none'; }
 
-        function renderHistory() {
-            const container = document.getElementById('history-feed');
-            container.innerHTML = draftHistory.map(item => `
-                <div class="flex gap-4 items-center bg-slate-800/20 p-3 rounded-xl border border-slate-800/50">
-                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0" style="background-color: ${item.team.color}; color: ${item.team.secondary}">${item.team.abbr}</div>
-                    <div class="min-w-0">
-                        <div class="text-xs font-black truncate text-slate-100">${item.player.name}</div>
-                        <div class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">${item.player.pos} | Pick ${item.num}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderUserPicks() {
-            const container = document.getElementById('user-picks');
-            container.innerHTML = userDraftClass.map(item => `
-                <div class="bg-sky-500/10 border border-sky-500/20 p-4 rounded-2xl">
-                    <div class="text-[9px] text-sky-400 font-black uppercase tracking-widest">Pick #${item.num}</div>
-                    <div class="text-sm font-black text-white truncate">${item.player.name}</div>
-                    <div class="text-[10px] text-slate-500 font-bold uppercase">${item.player.pos} • ${item.player.school}</div>
-                </div>
-            `).join('');
-        }
-
-        function resetDraft() { startDraft(1); }
-
-        // Start app
+        // Start 1 Round Draft by default
         document.addEventListener('DOMContentLoaded', () => startDraft(1));
     </script>
 </body>
